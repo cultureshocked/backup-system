@@ -1,4 +1,3 @@
-#include "cryptopp/iterhash.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
