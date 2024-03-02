@@ -8,7 +8,7 @@ Most of the code is designed to be portable across multiple systems, so long as 
 
 `cryptopp` is assumed to be packaged inside the `src` directory. Installation guide follows.
 
-The shell script makes heavy use of utilities expected to be installed on your system. Many of these will be isntalled by default on most systems. Notably, the list includes:
+The shell script makes heavy use of utilities expected to be installed on your system. Many of these will be installed by default on most systems. Notably, the list includes:
 
 - `md5sum`
 - `sha256sum`
