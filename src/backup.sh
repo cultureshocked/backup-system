@@ -21,12 +21,10 @@ DEVICE_NAME=/dev/$(lsblk -o name,serial | awk "/$CONNECTED_STATUS/ {print \$1}")
 
 if [[ $MOUNT_POINT == $CONNECTED_STATUS ]]; then
   MOUNT_POINT=/mnt/backup
-  # DEVICE_NAME=/dev/$(lsblk -o name,serial | awk "/$CONNECTED_STATUS/ {print \$1}")
-  # echo $DEVICE_NAME
   sudo mount --mkdir $DEVICE_NAME $MOUNT_POINT
 fi
 
-BACKUP_TARGET="$MOUNT_POINT"/backup-daily
+BACKUP_TARGET="$MOUNT_POINT"/backup-daily/
 
 DIRECTORIES=( )
 readarray -t DIRECTORIES < ./directories_to_backup.txt
@@ -36,14 +34,19 @@ mkdir $BACKUP_DIR
 
 for i in ${DIRECTORIES[@]}
 do
-  echo "Copying $i to $BACKUP_DIR ..."
+  # echo "Copying $i to $BACKUP_DIR ..."
   cp -r $i $BACKUP_DIR
-
 done
 
-echo $(ls -la $BACKUP_DIR)
+# echo $(ls -la $BACKUP_DIR)
 
 7z a -mx9 -mmt4 "/tmp/$BACKUP_FILENAME" "$BACKUP_DIR"
+
+cp "/tmp/$BACKUP_FILENAME" "$BACKUP_TARGET"/"$BACKUP_FILENAME"
+
+ARCHIVE_MD5="$(md5sum "/tmp/$BACKUP_FILENAME" | awk '{print $1}')"
+ARCHIVE_SHA256="$(sha256sum "/tmp/$BACKUP_FILENAME" | awk '{print $1}')"
+echo "$BACKUP_FILENAME $ARCHIVE_MD5 $ARCHIVE_SHA256" >> "$BACKUP_TARGET"/integrity.txt
 
 #DEBUG
 echo "BACKUP_NAME = $BACKUP_NAME"
@@ -54,5 +57,7 @@ echo "MOUNT_POINT = $MOUNT_POINT"
 #END DEBUG
 
 rm -rf $BACKUP_DIR
+rm -rf "/tmp/$BACKUP_FILENAME"
 
+sleep 10
 sudo umount $DEVICE_NAME 
