@@ -6,6 +6,8 @@
 #include <chrono>
 #include <vector>
 
+constexpr unsigned int MAX_AGE_IN_SECONDS { 60 * 60 * 24 * 30 };
+
 void purge_old_files(void);
 void rewrite_data_store(std::string filename);
 
@@ -21,7 +23,25 @@ int main(int argc, char** argv) {
 }
 
 void purge_old_files(void) {
+  namespace fs = std::filesystem;
+  std::vector<fs::path> archives;
+  for (auto filename : fs::directory_iterator(fs::current_path())) {
+    if (filename.path().has_extension() && filename.path().extension() == ".7z")
+      archives.push_back(filename.path());
+  }
+  auto current_time {std::chrono::system_clock::now()};
+  auto current_timestamp {std::chrono::duration_cast<std::chrono::seconds>(current_time.time_since_epoch()).count()};
+  for (auto filename : archives) {
+    std::string timestamp_string {filename.filename().string().substr(0, filename.filename().string().find('-'))};
+    unsigned long timestamp_int {std::stoul(timestamp_string)};
 
+
+    std::cout << timestamp_int << ": " << current_timestamp - timestamp_int << std::endl;
+    if (current_timestamp - timestamp_int > MAX_AGE_IN_SECONDS) {
+      std::cout << "Purging archive " << filename.filename() << std::endl;
+      fs::remove(filename);
+    }
+  }
 }
 
 void rewrite_data_store(std::string filename) {
@@ -48,7 +68,7 @@ void rewrite_data_store(std::string filename) {
   lines.erase(std::remove_if(lines.begin(), lines.end(), invalid_file), lines.end());
 
   fs.close();
-  fs.open(filename + "_new", std::ios::out);
+  fs.open(filename, std::ios::out);
   for (auto line : lines) {
     fs << line << '\n';
   }
