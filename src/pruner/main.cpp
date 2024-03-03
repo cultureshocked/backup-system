@@ -36,9 +36,7 @@ void purge_old_files(void) {
     unsigned long timestamp_int {std::stoul(timestamp_string)};
 
 
-    std::cout << timestamp_int << ": " << current_timestamp - timestamp_int << std::endl;
     if (current_timestamp - timestamp_int > MAX_AGE_IN_SECONDS) {
-      std::cout << "Purging archive " << filename.filename() << std::endl;
       fs::remove(filename);
     }
   }
