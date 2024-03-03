@@ -7,6 +7,9 @@ BACKUP_SUFFIX="-backup"           # Backup files will be called [TIMESTAMP][SUFF
 BACKUP_TMP_ROOT="/tmp/"           # Where to aggregate all files to archive+backup
 COMPRESSION_OPTIONS="-mx9 -mmt4"  # See `7z --help` for complete options. max compression + 4threads
 INTEGRITY_FILE="integrity.txt"    # The filename of the hash store in the backup root folder
+PRUNE_NAME="prune"
+VERIFY_NAME="verify"
+
 
 # Path to list of whitelisted directories to backup 
 DIRECTORY_LIST="./directories_to_backup.txt"
@@ -23,6 +26,8 @@ export BACKUP_SUFFIX
 export BACKUP_TMP_ROOT
 export DEFAULT_MOUNT_POINT
 export INTEGRITY_FILE
+export VERIFY_NAME
+export PRUNE_NAME
 
 if [[ -z $CONNECTED_STATUS ]]; then
   echo "ERR: Hot-Media not connected to device."
@@ -53,6 +58,11 @@ ARCHIVE_MD5="$(md5sum $BACKUP_FILE_FULLPATH | awk '{print $1}')"
 ARCHIVE_SHA256="$(sha256sum $BACKUP_FILE_FULLPATH | awk '{print $1}')"
 echo "$BACKUP_FILE $ARCHIVE_MD5 $ARCHIVE_SHA256" >> $BACKUP_INTEGRITY_FILE
 
+START_CWD=$(pwd)
+cd $BACKUP_TARGET_DIR
+./$PRUNE_NAME $INTEGRITY_FILE
+./$VERIFY_NAME $INTEGRITY_FILE
+cd $START_CWD
 rm $BACKUP_FILE_FULLPATH
 
 sync
