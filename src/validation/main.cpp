@@ -3,6 +3,7 @@
 #include <sstream>
 #include <algorithm>
 #include <cstdio>
+#include <filesystem>
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include "./cryptopp/cryptlib.h"
@@ -42,6 +43,7 @@ int main(int argc, char** argv) {
   auto entries {parse_lines(data)};
 
   prune_invalid_entries(entries);
+
   auto res = std::ranges::all_of(entries, validate_entry);
   std::cout << res << std::endl;
   return 0;
@@ -101,17 +103,13 @@ std::vector<f_entry> parse_lines(std::vector<std::string> lines) {
   return res;
 }
 
-// this is the fastest portable option, sorry stroustrup
 bool entry_exists(const f_entry& entry) {
-  auto fp = std::fopen(entry.f_name.c_str(), "r");
-  if (fp) {
-    std::fclose(fp);
-    return true;
-  }
-  return false;
+  namespace fs = std::filesystem;
+  auto cwd = fs::current_path();
+  return fs::exists(cwd/entry.f_name);
 }
 
-f_entry parse_entry(std::string line) {
+f_entry parse_entry(const std::string& line) {
   std::stringstream ss;
   f_entry e;
   ss << line;
