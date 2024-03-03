@@ -44,8 +44,7 @@ int main(int argc, char** argv) {
   prune_invalid_entries(entries);
 
   auto res = std::ranges::all_of(entries, validate_entry);
-  std::cout << res << std::endl;
-  return 0;
+  return (res == 1) ? 0 : 1;
 }
 
 std::string generate_md5(std::string filename) {
@@ -118,7 +117,11 @@ f_entry parse_entry(const std::string& line) {
 
 bool validate_entry(const f_entry& entry) {
   if (!entry_exists(entry)) return false;
-  return (compare_md5(entry) && compare_sha(entry));
+  bool status { compare_md5(entry) && compare_sha(entry) };
+  if (!status) 
+    std::cerr << "ERR: File " << entry.f_name << " did not pass verification.";
+
+  return status;
 }
 
 void prune_invalid_entries(std::vector<f_entry>& entries) {
