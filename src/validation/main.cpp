@@ -95,16 +95,9 @@ std::vector<std::string> parse_data_store(std::string filename) {
   return lines;
 }
 
-// should use std::transform probably
 std::vector<f_entry> parse_lines(std::vector<std::string> lines) {
   std::vector<f_entry> res;
-  std::ranges::for_each(lines, [&res](auto line){
-    f_entry entry;
-    std::stringstream ss;
-    ss << line;
-    ss >> entry.f_name >> entry.md5_digest >> entry.sha_digest;
-    res.push_back(entry);
-  });
+  std::ranges::transform(lines, std::back_inserter(res), parse_entry);
   return res;
 }
 
@@ -116,6 +109,14 @@ bool entry_exists(const f_entry& entry) {
     return true;
   }
   return false;
+}
+
+f_entry parse_entry(std::string line) {
+  std::stringstream ss;
+  f_entry e;
+  ss << line;
+  ss >> e.f_name >> e.md5_digest >> e.sha_digest;
+  return e;
 }
 
 bool validate_entry(const f_entry& entry) {
