@@ -49,9 +49,62 @@ make
 
 These steps will build `libcryptopp.a` in the `cryptopp` directory, which is then linked in the `Makefile` for the validator. All the headers will be available in `./cryptopp/` as well, so `main.cpp` can correctly `#include` them.
 
+To finish installing, move the generated binary (`main`) to the root of your backups folder. Rename it to `verify`.
+
+I know this process is really weird and clunky. It'll get better at some point. I want all the moving parts to work on their own before I streamline the build/install process. This project is far from finished.
+
+
+## Building the pruner
+
+```sh
+# ... from the repository root...
+cd src/pruner
+g++ -std=c++20 main.cpp -o prune
+```
+
+Move the binary (`prune`) to the root of your backup root folder.
+
+
+## Rough directory structure explanation
+
+This system will backup files and folders, based on a whitelist that you provide, to some sort of hot-media, in my case, a flash drive. It detects your flash drive based on its serial number.
+
+Right now, the serial number is hardcoded to `backup.sh` and if you want this system to work for you, you will need to change it.
+
+This is how I get the serial number if you know the device name (e.g., `/dev/sda`) (it is not the only way):
+```sh
+lsblk -o name,serial | awk '/[DEVICE NAME]/ { print $NF }'
+```
+Replacing the `[DEVICE NAME]` as needed.
+
+You can put `backup.sh`, `generate_paths.sh`, and create a new file called `directories_to_backup.txt` in the same folder somewhere on your system. You can also rename the whitelist file to something else, just be sure to reflect the changed name near the top of `backup.sh`.
+
+The hot media will be mounted by the script if it is not already mounted. By default, it will be mounted to `/mnt/backup`, and the folder will be created if it doesn't already exist.
+
+Inside the hot-media, the script will assume that `/mnt/backup/backup-daily` is the root of the archival folder. This is where you want to put the two binaries, `prune` and `verify`.
+
+Here's a simple tree-like diagram:
+```
+hot_media_root
+ ┗━ backup-daily
+     ┣━ integrity.txt       # made automatically during backup execution
+     ┣━ verify
+     ┣━ prune 
+     ┗━ [archive.7z files]
+
+/path/to/scripts
+ ┣━ backup.sh 
+ ┣━ generate_paths.sh 
+ ┗━ directories_to_backup.txt
+```
+
+Most of these paths and filenames are customizable within the first few lines of `backup.sh`.
+
+There are no checks to see if files exist, except in the `prune` and `verify` binaries. If something goes wrong, there's a very good chance that you just mistyped a filename or path somewhere.
+
 
 ## License
 
 Don't know yet. Don't use this software until I decide on one. :)
 
-
+Seriously, you might brick something. At least let me streamline a couple parts first.
