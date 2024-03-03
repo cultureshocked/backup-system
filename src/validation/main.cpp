@@ -42,14 +42,12 @@ int main(int argc, char** argv) {
   auto entries {parse_lines(data)};
 
   prune_invalid_entries(entries);
-  std::ranges::for_each(entries, [](auto e){std::cout << "Name: " << e.f_name << '\n' << "MD5: " << e.md5_digest << '\n' << std::endl;});
   auto res = std::ranges::all_of(entries, validate_entry);
   std::cout << res << std::endl;
   return 0;
 }
 
 std::string generate_md5(std::string filename) {
-  std::cout << "Calculating MD5 hash of " << filename << "..." << std::endl;
   static CryptoPP::Weak::MD5 hash;
   std::string res;
   CryptoPP::FileSource file(filename.c_str(), true, 
@@ -60,12 +58,10 @@ std::string generate_md5(std::string filename) {
                               )
                             )
   );
-  std::cout << "Hash calculated: " << res << std::endl;
   return res;
 }
 
 std::string generate_sha(std::string filename) {
-  std::cout << "Calculating SHA256 hash for " << filename << "..." << std::endl;
   static CryptoPP::SHA256 hash;
   std::string res;
   CryptoPP::FileSource file(filename.c_str(), true, 
@@ -76,7 +72,6 @@ std::string generate_sha(std::string filename) {
                               )
                             )
   );
-  std::cout << "Hash calculated: " << res << std::endl;
   return res;
 
 }
@@ -118,10 +113,8 @@ bool entry_exists(const f_entry& entry) {
   auto fp = std::fopen(entry.f_name.c_str(), "r");
   if (fp) {
     std::fclose(fp);
-    std::cout << "Entry verified to exist." << std::endl;
     return true;
   }
-  std::cout << "Entry does not exist." << std::endl;
   return false;
 }
 
@@ -138,5 +131,4 @@ void prune_invalid_entries(std::vector<f_entry>& entries) {
       [](auto entry){return !(entry_exists(entry));}), 
     entries.end()
   );
-  std::cout << "Pruned invalid entries." << std::endl;
 }
