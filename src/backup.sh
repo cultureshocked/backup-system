@@ -62,6 +62,11 @@ START_CWD=$(pwd)
 cd $BACKUP_TARGET_DIR
 ./$PRUNE_NAME $INTEGRITY_FILE
 ./$VERIFY_NAME $INTEGRITY_FILE
+if [ $? -ne 0 ]; then
+  echo "backup.sh: [ERR] One or more files failed verification." | sudo tee /dev/kmsg
+else
+  echo "backup.sh: [OK] All files passed verification." | sudo tee /dev/kmsg
+fi
 cd $START_CWD
 rm $BACKUP_FILE_FULLPATH
 
