@@ -55,12 +55,7 @@ void rewrite_data_store(std::string filename) {
   
   auto invalid_file = [](std::string line){
     line = std::filesystem::current_path() / line.substr(0, line.find(' '));
-    FILE* fp = std::fopen(line.c_str(), "r");
-    if (fp) {
-      std::fclose(fp);
-      return false;
-    }
-    return true;
+    return !std::filesystem::exists(line);
   };
 
   lines.erase(std::remove_if(lines.begin(), lines.end(), invalid_file), lines.end());
