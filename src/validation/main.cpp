@@ -2,7 +2,6 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
-#include <cstdio>
 #include <filesystem>
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
