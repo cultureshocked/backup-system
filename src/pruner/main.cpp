@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <cstdio>
 #include <filesystem>
 #include <algorithm>
 #include <chrono>
